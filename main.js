@@ -2,6 +2,36 @@ onload = () =>{
     document.body.classList.remove("container");
 };
 
+// Improve autoplay compatibility on mobile: try play and resume on first interaction
+const bgVideo = document.getElementById('bg-video');
+const bgAudio = document.getElementById('bg-audio');
+
+function tryAutoplayMedia() {
+    if (bgVideo && bgVideo.play) {
+        const p = bgVideo.play();
+        if (p && p.catch) p.catch(() => {});
+    }
+    if (bgAudio && bgAudio.play) {
+        const p = bgAudio.play();
+        if (p && p.catch) p.catch(() => {});
+    }
+}
+
+tryAutoplayMedia();
+
+function onFirstUserGesture() {
+    if (bgAudio) {
+        bgAudio.muted = false;
+        bgAudio.volume = 0.5;
+        bgAudio.play().catch(() => {});
+    }
+    if (bgVideo) bgVideo.play().catch(() => {});
+}
+
+['touchstart','click'].forEach(evt => {
+    window.addEventListener(evt, onFirstUserGesture, { once: true, passive: true });
+});
+
 const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
 const card = document.querySelector(".card");
