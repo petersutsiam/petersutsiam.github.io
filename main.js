@@ -42,57 +42,25 @@ function moveNoButton(targetBtn = noBtn) {
     let newX, newY;
 
     // Try a few random positions until one is at least minDistance away
-    const maxAttempts = isNo2 ? 80 : 20;
+    const maxAttempts = isNo2 ? 60 : 20;
     let attempt = 0;
-    const padding = 10; // minimum gap from yes2
     for (; attempt < maxAttempts; attempt++) {
         newX = Math.random() * maxX;
         newY = Math.random() * maxY;
         const dx = newX - currentX;
         const dy = newY - currentY;
-        if (Math.hypot(dx, dy) < minDistance) continue;
-
-        // If this is no2, ensure it doesn't overlap yes2 (keep padding)
-        if (isNo2 && yes2) {
-            const yesRect = yes2.getBoundingClientRect();
-            const yesX = yesRect.left - cardRect.left;
-            const yesY = yesRect.top - cardRect.top;
-            // check rect overlap with padding
-            const overlapX = !(newX + btnRect.width + padding <= yesX || newX >= yesX + yesRect.width + padding);
-            const overlapY = !(newY + btnRect.height + padding <= yesY || newY >= yesY + yesRect.height + padding);
-            if (overlapX && overlapY) continue; // reject this candidate
-        }
-
-        break;
+        if (Math.hypot(dx, dy) >= minDistance) break;
     }
 
     // If we didn't find a sufficiently distant random spot, force a jump outward
     if (attempt === maxAttempts) {
-        // Force a position that keeps padding from yes2 when possible
-        if (isNo2 && yes2) {
-            const yesRect = yes2.getBoundingClientRect();
-            const yesX = yesRect.left - cardRect.left + yesRect.width / 2;
-            const yesY = yesRect.top - cardRect.top + yesRect.height / 2;
-            const btnHalfW = btnRect.width / 2;
-            const btnHalfH = btnRect.height / 2;
-            const reqDist = Math.hypot(btnHalfW + yesRect.width / 2 + padding, btnHalfH + yesRect.height / 2 + padding);
-            const angle = Math.random() * Math.PI * 2;
-            const forcedDist = Math.max(reqDist, minDistance);
-            const centerX = yesX + Math.cos(angle) * forcedDist;
-            const centerY = yesY + Math.sin(angle) * forcedDist;
-            newX = centerX - btnHalfW;
-            newY = centerY - btnHalfH;
-            newX = Math.max(0, Math.min(newX, maxX));
-            newY = Math.max(0, Math.min(newY, maxY));
-        } else {
-            const angle = Math.random() * Math.PI * 2;
-            const forcedDist = minDistance * (isNo2 ? (1 + Math.random() * 2) : 1);
-            newX = currentX + Math.cos(angle) * forcedDist;
-            newY = currentY + Math.sin(angle) * forcedDist;
-            // clamp into card bounds
-            newX = Math.max(0, Math.min(newX, maxX));
-            newY = Math.max(0, Math.min(newY, maxY));
-        }
+        const angle = Math.random() * Math.PI * 2;
+        const forcedDist = minDistance * (isNo2 ? (1 + Math.random() * 2) : 1);
+        newX = currentX + Math.cos(angle) * forcedDist;
+        newY = currentY + Math.sin(angle) * forcedDist;
+        // clamp into card bounds
+        newX = Math.max(0, Math.min(newX, maxX));
+        newY = Math.max(0, Math.min(newY, maxY));
     }
 
     // If it's no2, occasionally bias to edges for more dramatic jumps
